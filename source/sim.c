@@ -36,7 +36,15 @@ void process_instruction()
 
         case (0x9): //addiu
         
-            
+            uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
+
+            uint32_t rt = (instruction<<11)>>27; //Valor do registrador de recebimento
+
+            uint32_t imme = (instruction & 0x0000FFFF); //Valor do imediato
+
+            rs = CURRENT_STATE.REGS[rs]; //Valor que está no registrador como o primeiro valor da adição
+
+            NEXT_STATE.REGS[rt] = rs + imme;
 
         break;
 
