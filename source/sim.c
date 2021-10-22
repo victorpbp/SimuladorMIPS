@@ -42,15 +42,14 @@ void process_instruction()
 
             uint32_t imme = (instruction & 0x0000FFFF); //Valor do imediato
 
-            rs = CURRENT_STATE.REGS[rs]; //Valor que está no registrador como o primeiro valor da adição
+            NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + imme;
 
-            NEXT_STATE.REGS[rt] = rs + imme;
+            NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+
+            printf("valor do registrador: %d",NEXT_STATE.REGS[rt]);
 
         break;
 
 
      }
-
-
-
 }
