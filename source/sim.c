@@ -16,13 +16,17 @@ void process_instruction()
 
         //Registradores//
 
-        case (0):
+        case (0):;
        
             uint32_t functcode = instruction & 0b00000000000000000000000000011111;
 
             switch (functcode) { 
 
-                case (0x20): //add
+                case (0x20): //add //Causes an exception upon overflow
+
+                
+
+
 
 
                 break;
@@ -33,8 +37,9 @@ void process_instruction()
 
 
         //Imediatos//
+        
 
-        case (0x9): //addiu
+        case (0x9):; //addiu
         
             uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
 
@@ -46,7 +51,9 @@ void process_instruction()
 
             NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 
-            printf("valor do registrador: %d\n",NEXT_STATE.REGS[rt]);
+            printf("valor do registrador: %d\n",NEXT_STATE.REGS[2]); //Caso de teste pra saber o valor do V0
+            printf("valor do registrador: %d\n",NEXT_STATE.REGS[8]); //Caso de teste pra saber o valor do t0
+            printf("valor do registrador: %d\n",NEXT_STATE.REGS[9]); //Caso de testa pra saber o valor do t1
 
         break;
 
