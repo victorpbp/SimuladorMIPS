@@ -46,7 +46,7 @@ void process_instruction()
 
             NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 
-            printf("valor do registrador: %d",NEXT_STATE.REGS[rt]);
+            printf("valor do registrador: %d\n",NEXT_STATE.REGS[rt]);
 
         break;
 
