@@ -22,13 +22,43 @@ void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
 
 //SRA (Shift Right Arithmetic)//
 
-void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
+void sra(uint32_t rt, uint32_t rd, uint32_t sa) {
 
     NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>sa;
 
     int32_t mask = 0b10000000000000000000000000000000;
 
     if (sa>0) mask>>(sa-1);
+    
+    NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
+
+}
+
+//SLLV (Shift Left Logical Variable)//
+
+void sllv(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])<<CURRENT_STATE.REGS[rs];
+
+}
+
+//SRLV (Shift Right Logical Variable)//
+
+void srlv(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>CURRENT_STATE.REGS[rs];
+
+}
+
+//SRAV (Shift Right Arithmetic Variable)//
+
+void srav(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>CURRENT_STATE.REGS[rs];
+
+    int32_t mask = 0b10000000000000000000000000000000;
+
+    if (CURRENT_STATE.REGS[rs]>0) mask>>(CURRENT_STATE.REGS[rs]-1);
     
     NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
 
@@ -157,9 +187,11 @@ void process_instruction()
                 break;
 
 
-                //SLL (Shift Left Logical Variable)//
+                //SLLV (Shift Left Logical Variable)//
 
                 case (0x04):;
+
+                sllv(rsR,rtR,rdR);
                 
                 break;
 
@@ -168,12 +200,16 @@ void process_instruction()
 
                 case (0x06):;
 
+                srlv(rsR,rtR,rdR);
+
                 break;
 
 
                 //SRAV (Shift Right Arithmetic Variable)//
 
                 case (0x07):;
+
+                srav(rsR,rtR,rdR);
 
                 break;
 
