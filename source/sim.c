@@ -241,6 +241,15 @@ void process_instruction()
                 break;
 
 
+                //SYSCALL (Syscall)//
+
+                case (0xc):;
+
+                if (CURRENT_STATE.REGS[2]==10) RUN_BIT=0;
+
+                break;
+
+
             }
 
         break;
