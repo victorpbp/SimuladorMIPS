@@ -125,9 +125,37 @@ void process_instruction()
                 break;
 
 
+                //SLL (Shift Left Logical Variable)//
+
+                case (0x04):;
+                
+                break;
+
+
+                //SRLV (Shift Right Logical Variable)//
+
+                case (0x06):;
+
+                break;
+
+
+                //SRAV (Shift Right Arithmetic Variable)//
+
+                case (0x07):;
+
+                break;
+
+
                 //JR (Jump Registry)//
 
                 case (0x08):;
+
+                break;
+
+
+                //JALR (Jump and Link Register)//
+
+                case (0x09):;
 
                 break;
 
@@ -139,9 +167,23 @@ void process_instruction()
                 break;
 
 
+                //MTHI (Move from HI)//
+
+                case (0x11):;
+
+                break;
+
+
                 //MFLO (Move from LO)//
 
                 case (0x12):;
+
+                break;
+
+
+                //MTLO (Move from LO)//
+
+                case (0x13):;
 
                 break;
 
@@ -202,6 +244,13 @@ void process_instruction()
                 //OR//
 
                 case (0x25):;
+
+                break;
+
+
+                //XOR//
+
+                case (0x26):;
 
                 break;
 
@@ -294,6 +343,64 @@ void process_instruction()
         //IMEDIATOS//
 
 
+        //SOME ODD BRANCH COMMANDS THAT REQUIRE MORE MANIPULATION (CHECK THE MIPS INSTRUCTIONS BY THEIR NAMES)//
+
+        case (0x1):;
+
+            uint32_t whichOne = (instruction<<11)>>27;
+
+            switch (whichOne) {
+
+                //BLTZ (Branch on Less Than Zero)//
+
+                case (0x0):;
+
+                break;
+
+
+                //BGEZ (Branch on Greater Than or Equal to Zero)//
+
+                case (0x1):;
+
+                break;
+
+
+                //BLTZAL (Branch on Less Than Zero and Link)///
+
+                case (0x10):;
+
+                break; 
+
+
+                //BLTZAL (Branch on Less Than Zero and Link)///
+
+                case (0x11):;
+
+                break; 
+
+            
+            }
+/////////////////////////////////////////////////////////////////////
+
+
+        break;
+
+
+
+        //BLEZ (Branch on Less Than or Equal to Zero)//
+
+        case (0x6):;
+
+        break;
+
+
+        //BGTZ (Branch on Greater Than Zero)//
+
+        case (0x7):;
+
+        break;
+
+
         //ADDI//
 
         case (0x8):;
@@ -338,15 +445,36 @@ void process_instruction()
         break;
 
 
+        //XORI//
+
+        case (0xe):;
+
+        break;
+
+
 
 /////////////////////////////////////////////////////////////////////
 
-        //LOAD//
+        //LOAD (AINDA SÃO IMEDIATOS)//
 
 
         //LUI (Load Upper Immediate)//
 
         case (0xf):;
+
+        break;
+
+
+        //LB (Load Byte)//
+
+        case (0x20):;
+
+        break;
+
+
+        //LH (Load Halfword)//
+
+        case (0x21):;
 
         break;
 
