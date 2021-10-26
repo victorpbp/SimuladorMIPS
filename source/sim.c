@@ -4,15 +4,39 @@
 
 //OPERAÇÕES DO TIPO R (REGISTRADORES)//
 
+//SLL (Shift Left Logical)//
+
+void sll(uint32_t rt, uint32_t rd, uint32_t sa) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])<<sa;
+
+}
+
+//SRL (Shift Right Logical)//
+
+void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>sa;
+
+}
+
+//SRA (Shift Right Arithmetic)//
+
+void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>sa;
+
+    int32_t mask = 0b10000000000000000000000000000000;
+
+    if (sa>0) mask>>(sa-1);
+    
+    NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
+
+}
+
 //ADD//
 
-void add(uint32_t instruction) {
-
-    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
-
-    uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor de adição
-
-    uint32_t rd = (instruction<<16)>>27; //Valor do registrador destino da operação
+void add(uint32_t rs, uint32_t rt, uint32_t rd) {
 
     NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 
@@ -21,13 +45,7 @@ void add(uint32_t instruction) {
 
 //ADDU//
 
-void addu(uint32_t instruction) {
-
-    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
-
-    uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor de adição
-
-    uint32_t rd = (instruction<<16)>>27; //Valor do registrador destino da operação
+void addu(uint32_t rs, uint32_t rt, uint32_t rd) {
 
     NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 
@@ -101,12 +119,22 @@ void process_instruction()
        
             uint32_t functcode = instruction & 0b00000000000000000000000000011111; //Grabbing the funct code at the end of the instruction
 
+            uint32_t rsR = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
+
+            uint32_t rtR = (instruction<<11)>>27; //Valor do registrador com o segundo valor de adição
+
+            uint32_t rdR = (instruction<<16)>>27; //Valor do registrador destino da operação
+
+            uint32_t saR = (instruction<<21)>>27; //Shifts
+
             switch (functcode) { 
 
 
                 //SLL (Shift Left Logical)//
 
                 case (0):;
+
+                sll(rtR,rdR,saR);
                 
                 break;
 
@@ -115,12 +143,16 @@ void process_instruction()
 
                 case (0x02):;
 
+                srl(rtR,rdR,saR);
+
                 break;
 
 
                 //SRA (Shift Right Arithmetic)//
 
                 case (0x03):;
+
+                sra(rtR,rdR,saR);
 
                 break;
 
@@ -206,7 +238,7 @@ void process_instruction()
 
                 case (0x20):; //add //Causes an exception upon overflow (How do I do that?)
 
-                add(instruction);
+                add(rsR,rtR,rdR);
 
                 break;
 
@@ -215,7 +247,7 @@ void process_instruction()
 
                 case (0x21):; //addu //Does NOT cause an exception upon overflow (How do I do that?)
 
-                addu(instruction);
+                addu(rsR,rtR,rdR);
 
                 break;
 
