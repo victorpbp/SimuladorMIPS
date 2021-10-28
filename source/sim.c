@@ -12,6 +12,7 @@ void sll(uint32_t rt, uint32_t rd, uint32_t sa) {
 
 }
 
+
 //SRL (Shift Right Logical)//
 
 void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
@@ -19,6 +20,7 @@ void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
     NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>sa;
 
 }
+
 
 //SRA (Shift Right Arithmetic)//
 
@@ -34,6 +36,7 @@ void sra(uint32_t rt, uint32_t rd, uint32_t sa) {
 
 }
 
+
 //SLLV (Shift Left Logical Variable)//
 
 void sllv(uint32_t rs, uint32_t rt, uint32_t rd) {
@@ -42,6 +45,7 @@ void sllv(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 }
 
+
 //SRLV (Shift Right Logical Variable)//
 
 void srlv(uint32_t rs, uint32_t rt, uint32_t rd) {
@@ -49,6 +53,7 @@ void srlv(uint32_t rs, uint32_t rt, uint32_t rd) {
     NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>CURRENT_STATE.REGS[rs];
 
 }
+
 
 //SRAV (Shift Right Arithmetic Variable)//
 
@@ -63,6 +68,72 @@ void srav(uint32_t rs, uint32_t rt, uint32_t rd) {
     NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
 
 }
+
+//JR (Jump Register)//
+
+//JALR (Jump and Link Register)//
+
+//MFHI (Move from HI)//
+
+void mfhi(uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+
+}
+
+
+//MTHI (Move to HI)//
+
+void mthi(uint32_t rs) {
+
+    NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+
+}
+
+
+//MFLO (Move from LO)//
+
+void mflo(uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+
+}
+
+
+//MTLO (Move to LO)//
+
+void mthi(uint32_t rs) {
+
+    NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+
+}
+
+
+//MULT//
+
+void mult(uint32_t rs , uint32_t rt) {
+
+    uint64_t temporary = (int32_t) CURRENT_STATE.REGS[rs] * (int32_t) CURRENT_STATE.REGS[rt];
+
+    CURRENT_STATE.HI = (temporary>>32);
+
+    CURRENT_STATE.LO = ((temporary<<32)>>32);
+
+}
+
+
+//MULTU//
+
+void multu(uint32_t rs , uint32_t rt) {
+
+    uint64_t temporary = CURRENT_STATE.REGS[rs] * CURRENT_STATE.REGS[rt];
+
+    CURRENT_STATE.HI = (temporary>>32);
+
+    CURRENT_STATE.LO = ((temporary<<32)>>32);
+
+}
+
 
 //ADD//
 
@@ -80,6 +151,62 @@ void addu(uint32_t rs, uint32_t rt, uint32_t rd) {
     NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 
 }
+
+
+//SUB//
+
+void sub(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] - CURRENT_STATE.REGS[rs];
+
+}
+
+
+//SUBU//
+
+void subu(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] - CURRENT_STATE.REGS[rs];
+
+}
+
+
+//AND//
+
+void and(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+
+}
+
+
+//OR//
+
+void or(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+
+}
+
+
+//XOR//
+
+void xor(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt] ^ CURRENT_STATE.REGS[rs]);
+
+}
+
+
+//NOR//
+
+void nor(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rt] | CURRENT_STATE.REGS[rs]);
+
+}
+
+
 
 /////////////////////////////////////////////////////////////////////
 
@@ -232,12 +359,16 @@ void process_instruction()
 
                 case (0x10):;
 
+                mfhi(rdR);
+
                 break;
 
 
-                //MTHI (Move from HI)//
+                //MTHI (Move to HI)//
 
                 case (0x11):;
+
+                mthi(rsR);
 
                 break;
 
@@ -246,12 +377,16 @@ void process_instruction()
 
                 case (0x12):;
 
+                mflo(rdR);
+
                 break;
 
 
-                //MTLO (Move from LO)//
+                //MTLO (Move to LO)//
 
                 case (0x13):;
+
+                mtlo(rsR);
 
                 break;
 
@@ -260,12 +395,16 @@ void process_instruction()
 
                 case (0x18):;
 
+                mult(rsR, rtR);
+
                 break;
 
 
                 //MULTU//
 
                 case (0x19):;
+
+                multu(rsR, rtR);
 
                 break;
 
@@ -292,12 +431,16 @@ void process_instruction()
 
                 case (0x22):;
 
+                sub(rsR,rtR,rdR);
+
                 break;
 
 
                 //SUBU//
 
                 case (0x23):;
+
+                subu(rsR,rtR,rdR);
 
                 break;
 
@@ -306,12 +449,16 @@ void process_instruction()
 
                 case (0x24):;
 
+                and(rsR,rtR,rdR);
+
                 break;
 
 
                 //OR//
 
                 case (0x25):;
+
+                or(rsR,rtR,rdR);
 
                 break;
 
@@ -320,12 +467,16 @@ void process_instruction()
 
                 case (0x26):;
 
+                xor(rsR,rtR,rdR);
+
                 break;
 
 
                 //NOR//
 
                 case (0x27):;
+
+                nor(rsR,rtR,rdR);
 
                 break;
 
