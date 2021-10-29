@@ -69,9 +69,26 @@ void srav(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 }
 
+
 //JR (Jump Register)//
 
+void jr(uint32_t rs) {
+
+    NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+
+}
+
+
 //JALR (Jump and Link Register)//
+
+void jalr(uint32_t rs, uint32_t rd) {
+
+    NEXT_STATE.REGS[rd] = NEXT_STATE.PC;
+
+    NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+
+}
+
 
 //MFHI (Move from HI)//
 
@@ -207,6 +224,62 @@ void nor(uint32_t rs, uint32_t rt, uint32_t rd) {
 }
 
 
+//DIV//
+
+void div(uint32_t rs , uint32_t rt) {
+
+    int32_t first = CURRENT_STATE.REGS[rs];
+
+    int32_t second = CURRENT_STATE.REGS[rt];
+
+    NEXT_STATE.LO = first/second;
+
+    NEXT_STATE.HI = first%second;
+
+    //Do I have to deal with the case of the divisor being 0 or not? If so, how do I assign an Undefined?
+
+
+}
+
+
+//DIVU//
+
+void divu(uint32_t rs , uint32_t rt) {
+
+    NEXT_STATE.LO = CURRENT_STATE.REGS[rs]/CURRENT_STATE.REGS[rt];
+
+    NEXT_STATE.HI = CURRENT_STATE.REGS[rs]%CURRENT_STATE.REGS[rt];
+
+    //Do I have to deal with the case of the divisor being 0 or not? If so, how do I assign an Undefined?
+
+}
+
+
+
+//SLT//
+
+void slt(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    int32_t first = CURRENT_STATE.REGS[rs];
+    
+    int32_t second = CURRENT_STATE.REGS[rt];
+
+
+    if ( first < second ) CURRENT_STATE.REGS[rd]=1;
+    else CURRENT_STATE.REGS[rd]=0;
+
+}
+
+
+//SLTU//
+
+void sltu(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    if ( CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt] ) CURRENT_STATE.REGS[rd]=1;
+    else CURRENT_STATE.REGS[rd]=0;
+
+}
+
 
 /////////////////////////////////////////////////////////////////////
 
@@ -341,16 +414,20 @@ void process_instruction()
                 break;
 
 
-                //JR (Jump Registry)//
+                //JR (Jump Register)//
 
                 case (0x08):;
+
+                jr(rsR);
 
                 break;
 
 
-                //JALR (Jump and Link Register)//
+                //JALR (Jump and Link Register)// Do I have to take care of the case if RD is ommited and I have to assume it goes to the $ra?
 
                 case (0x09):;
+
+                jalr(rsR,rdR);
 
                 break;
 
@@ -481,9 +558,11 @@ void process_instruction()
                 break;
 
 
-                //DIV//
+                //DIV// Should I worry if the divisor is 0? If so, how do I return undefined?
 
                 case (0x1a):;
+
+                div(rsR,rtR);
 
                 break;
 
@@ -492,6 +571,8 @@ void process_instruction()
 
                 case (0x1b):;
 
+                divu(rsR,rtR);
+
                 break;
 
 
@@ -499,12 +580,16 @@ void process_instruction()
 
                 case (0x2a):;
 
+                slt(rsR,rtR,rdR);
+
                 break;
 
 
                 //SLTU (Set Less Than Unsigned)//
 
                 case (0x2b):;
+
+                sltu(rsR,rtR,rdR);
 
                 break;
 
