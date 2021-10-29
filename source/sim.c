@@ -119,7 +119,7 @@ void mflo(uint32_t rd) {
 
 //MTLO (Move to LO)//
 
-void mthi(uint32_t rs) {
+void mtlo(uint32_t rs) {
 
     NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 
