@@ -341,16 +341,15 @@ void process_instruction()
      //Se for jump relativo, a gente sempre tem que contar com o +4, então tudo normal
      //Se for jump absoluto, tudo bem também porque a gente só tá transferindo o valor e esse primeiro comando vai ser "inútil" mas ele vai facilitar muito o entendimento e evita DEMAIS repetição no código
 
+    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor da operação
+
+    uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor da operação
 
 
 
      switch(opcode) {
 
 /////////////////////////////////////////////////////////////////////
-
-        uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor da operação
-
-        uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor da operação
 
         //REGISTRADORES//
 
@@ -663,35 +662,35 @@ void process_instruction()
 
         case (0x1):;
 
-            uint32_t whichOne = (instruction<<11)>>27;
-
-            switch (whichOne) {
+            switch (rt) {
 
                 //BLTZ (Branch on Less Than Zero)//
 
-                case (0x0):;
-
+                case (0x0):
+                   if (rs <= 0) NEXT_STATE.PC += immediate;
                 break;
 
 
                 //BGEZ (Branch on Greater Than or Equal to Zero)//
 
-                case (0x1):;
-
+                case (0x1):
+                   if (rs >= 0) NEXT_STATE.PC += immediate;
                 break;
 
 
                 //BLTZAL (Branch on Less Than Zero and Link)///
 
-                case (0x10):;
-
+                case (0x10):
+                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
+                   if (rs <= 0) NEXT_STATE.PC += immediate;
                 break; 
 
 
-                //BLTZAL (Branch on Less Than Zero and Link)///
+                //Branch On Greater Than Or Equal To Zero And Link///
 
                 case (0x11):;
-
+                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
+                   if (rs >= 0) NEXT_STATE.PC += immediate;
                 break; 
 
             
