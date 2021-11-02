@@ -280,6 +280,11 @@ void sltu(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 }
 
+void jump(uint32_t instruction) {
+    int jumpAdrr = (instruction & 0b00000011111111111111111111111111) << 2; 
+    NEXT_STATE.PC &= (0b11110000000000000000000000000000); 
+    NEXT_STATE.PC |= jumpAdrr;          
+}
 
 /////////////////////////////////////////////////////////////////////
 
@@ -343,15 +348,15 @@ void process_instruction()
 
 /////////////////////////////////////////////////////////////////////
 
+        uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor da operação
+
+        uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor da operação
+
         //REGISTRADORES//
 
         case (0):; 
        
             uint32_t functcode = instruction & 0b00000000000000000000000000011111; //Grabbing the funct code at the end of the instruction
-
-            uint32_t rsR = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
-
-            uint32_t rtR = (instruction<<11)>>27; //Valor do registrador com o segundo valor de adição
 
             uint32_t rdR = (instruction<<16)>>27; //Valor do registrador destino da operação
 
@@ -364,7 +369,7 @@ void process_instruction()
 
                 case (0):;
 
-                sll(rtR,rdR,saR);
+                sll(rt,rdR,saR);
                 
                 break;
 
@@ -373,7 +378,7 @@ void process_instruction()
 
                 case (0x02):;
 
-                srl(rtR,rdR,saR);
+                srl(rt,rdR,saR);
 
                 break;
 
@@ -382,7 +387,7 @@ void process_instruction()
 
                 case (0x03):;
 
-                sra(rtR,rdR,saR);
+                sra(rt,rdR,saR);
 
                 break;
 
@@ -391,7 +396,7 @@ void process_instruction()
 
                 case (0x04):;
 
-                sllv(rsR,rtR,rdR);
+                sllv(rs,rt,rdR);
                 
                 break;
 
@@ -400,7 +405,7 @@ void process_instruction()
 
                 case (0x06):;
 
-                srlv(rsR,rtR,rdR);
+                srlv(rs,rt,rdR);
 
                 break;
 
@@ -409,7 +414,7 @@ void process_instruction()
 
                 case (0x07):;
 
-                srav(rsR,rtR,rdR);
+                srav(rs,rt,rdR);
 
                 break;
 
@@ -418,7 +423,7 @@ void process_instruction()
 
                 case (0x08):;
 
-                jr(rsR);
+                jr(rs);
 
                 break;
 
@@ -427,7 +432,7 @@ void process_instruction()
 
                 case (0x09):;
 
-                jalr(rsR,rdR);
+                jalr(rs,rdR);
 
                 break;
 
@@ -445,7 +450,7 @@ void process_instruction()
 
                 case (0x11):;
 
-                mthi(rsR);
+                mthi(rs);
 
                 break;
 
@@ -463,7 +468,7 @@ void process_instruction()
 
                 case (0x13):;
 
-                mtlo(rsR);
+                mtlo(rs);
 
                 break;
 
@@ -472,7 +477,7 @@ void process_instruction()
 
                 case (0x18):;
 
-                mult(rsR, rtR);
+                mult(rs, rt);
 
                 break;
 
@@ -481,7 +486,7 @@ void process_instruction()
 
                 case (0x19):;
 
-                multu(rsR, rtR);
+                multu(rs, rt);
 
                 break;
 
@@ -490,7 +495,7 @@ void process_instruction()
 
                 case (0x20):; //add //Causes an exception upon overflow (How do I do that?)
 
-                add(rsR,rtR,rdR);
+                add(rs,rt,rdR);
 
                 break;
 
@@ -499,7 +504,7 @@ void process_instruction()
 
                 case (0x21):; //addu //Does NOT cause an exception upon overflow (How do I do that?)
 
-                addu(rsR,rtR,rdR);
+                addu(rs,rt,rdR);
 
                 break;
 
@@ -508,7 +513,7 @@ void process_instruction()
 
                 case (0x22):;
 
-                sub(rsR,rtR,rdR);
+                sub(rs,rt,rdR);
 
                 break;
 
@@ -517,7 +522,7 @@ void process_instruction()
 
                 case (0x23):;
 
-                subu(rsR,rtR,rdR);
+                subu(rs,rt,rdR);
 
                 break;
 
@@ -526,7 +531,7 @@ void process_instruction()
 
                 case (0x24):;
 
-                and(rsR,rtR,rdR);
+                and(rs,rt,rdR);
 
                 break;
 
@@ -535,7 +540,7 @@ void process_instruction()
 
                 case (0x25):;
 
-                or(rsR,rtR,rdR);
+                or(rs,rt,rdR);
 
                 break;
 
@@ -544,7 +549,7 @@ void process_instruction()
 
                 case (0x26):;
 
-                xor(rsR,rtR,rdR);
+                xor(rs,rt,rdR);
 
                 break;
 
@@ -553,7 +558,7 @@ void process_instruction()
 
                 case (0x27):;
 
-                nor(rsR,rtR,rdR);
+                nor(rs,rt,rdR);
 
                 break;
 
@@ -562,7 +567,7 @@ void process_instruction()
 
                 case (0x1a):;
 
-                div(rsR,rtR);
+                div(rs,rt);
 
                 break;
 
@@ -571,7 +576,7 @@ void process_instruction()
 
                 case (0x1b):;
 
-                divu(rsR,rtR);
+                divu(rs,rt);
 
                 break;
 
@@ -580,7 +585,7 @@ void process_instruction()
 
                 case (0x2a):;
 
-                slt(rsR,rtR,rdR);
+                slt(rs,rt,rdR);
 
                 break;
 
@@ -589,7 +594,7 @@ void process_instruction()
 
                 case (0x2b):;
 
-                sltu(rsR,rtR,rdR);
+                sltu(rs,rt,rdR);
 
                 break;
 
@@ -616,6 +621,8 @@ void process_instruction()
 
         case (0x2):;
 
+          jump(instruction);
+
         break;
 
 
@@ -623,19 +630,9 @@ void process_instruction()
 
         case (0x3):;
 
-        break;
-
-
-        //BEQ (Branch Equal To)//
-
-        case (0x4):;
-
-        break;
-
-
-        //BNE (Branch NOT Equal To)//
-
-        case (0x5):;
+          NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
+          jump(instruction);
+         
 
         break;
 
@@ -645,6 +642,21 @@ void process_instruction()
 
 
         //IMEDIATOS//
+
+        uint32_t immediate = instruction && 0x00000000000000001111111111111111;
+
+        //BEQ (Branch Equal To)//
+
+        case (0x4):;
+          if (rs == rt) NEXT_STATE.PC += immediate;
+        break;
+
+
+        //BNE (Branch NOT Equal To)//
+
+        case (0x5):;
+         if (rs != rt) NEXT_STATE.PC += immediate;
+        break;
 
 
         //SOME ODD BRANCH COMMANDS THAT REQUIRE MORE MANIPULATION (CHECK THE MIPS INSTRUCTIONS BY THEIR NAMES)//
