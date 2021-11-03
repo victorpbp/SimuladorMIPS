@@ -152,15 +152,6 @@ void multu(uint32_t rs , uint32_t rt) {
 }
 
 
-//ADD//
-
-void add(uint32_t rs, uint32_t rt, uint32_t rd) {
-
-    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
-
-}
-
-
 //ADDU//
 
 void addu(uint32_t rs, uint32_t rt, uint32_t rd) {
@@ -297,15 +288,15 @@ void jump(uint32_t instruction) {
 
 //ADDIU//
 
-void addiu(uint32_t instruction) { 
+void addiu(uint32_t instruction, uint32_t rs, uint32_t rt, uint32_t immediate) { 
 
-    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
+    // uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor de adição
 
-    uint32_t rt = (instruction<<11)>>27; //Valor do registrador de recebimento
+    // uint32_t rt = (instruction<<11)>>27; //Valor do registrador de recebimento
 
-    uint32_t imme = (instruction & 0x0000FFFF); //Valor do imediato
+    // uint32_t immediate = (instruction & 0x0000FFFF); //Valor do imediato
 
-    NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + imme;
+    NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + immediate;
 
     printf("valor do registrador: %d\n",NEXT_STATE.REGS[2]); //Caso de teste pra saber o valor do V0
     printf("valor do registrador: %d\n",NEXT_STATE.REGS[8]); //Caso de teste pra saber o valor do t0
@@ -341,11 +332,11 @@ void process_instruction()
      //Se for jump relativo, a gente sempre tem que contar com o +4, então tudo normal
      //Se for jump absoluto, tudo bem também porque a gente só tá transferindo o valor e esse primeiro comando vai ser "inútil" mas ele vai facilitar muito o entendimento e evita DEMAIS repetição no código
 
-    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor da operação
+    uint32_t rs = (instruction<<6)>>27; //Valor do registrador com o primeiro valor da operação dos tipos R e I
 
-    uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor da operação
+    uint32_t rt = (instruction<<11)>>27; //Valor do registrador com o segundo valor da operação dos tipos R e I
 
-
+    uint32_t immediate = (instruction & 0x0000FFFF); ////Valor do imediato da operação do tipo I
 
      switch(opcode) {
 
@@ -363,10 +354,9 @@ void process_instruction()
 
             switch (functcode) { 
 
-
                 //SLL (Shift Left Logical)//
 
-                case (0):;
+                case (0):
 
                 sll(rt,rdR,saR);
                 
@@ -375,7 +365,7 @@ void process_instruction()
 
                 //SRL (Shift Right Logical)//
 
-                case (0x02):;
+                case (0x02):
 
                 srl(rt,rdR,saR);
 
@@ -384,7 +374,7 @@ void process_instruction()
 
                 //SRA (Shift Right Arithmetic)//
 
-                case (0x03):;
+                case (0x03):
 
                 sra(rt,rdR,saR);
 
@@ -393,7 +383,7 @@ void process_instruction()
 
                 //SLLV (Shift Left Logical Variable)//
 
-                case (0x04):;
+                case (0x04):
 
                 sllv(rs,rt,rdR);
                 
@@ -402,7 +392,7 @@ void process_instruction()
 
                 //SRLV (Shift Right Logical Variable)//
 
-                case (0x06):;
+                case (0x06):
 
                 srlv(rs,rt,rdR);
 
@@ -411,7 +401,7 @@ void process_instruction()
 
                 //SRAV (Shift Right Arithmetic Variable)//
 
-                case (0x07):;
+                case (0x07):
 
                 srav(rs,rt,rdR);
 
@@ -420,7 +410,7 @@ void process_instruction()
 
                 //JR (Jump Register)//
 
-                case (0x08):;
+                case (0x08):
 
                 jr(rs);
 
@@ -429,7 +419,7 @@ void process_instruction()
 
                 //JALR (Jump and Link Register)// Do I have to take care of the case if RD is ommited and I have to assume it goes to the $ra?
 
-                case (0x09):;
+                case (0x09):
 
                 jalr(rs,rdR);
 
@@ -438,7 +428,7 @@ void process_instruction()
 
                 //MFHI (Move from HI)//
 
-                case (0x10):;
+                case (0x10):
 
                 mfhi(rdR);
 
@@ -447,7 +437,7 @@ void process_instruction()
 
                 //MTHI (Move to HI)//
 
-                case (0x11):;
+                case (0x11):
 
                 mthi(rs);
 
@@ -456,7 +446,7 @@ void process_instruction()
 
                 //MFLO (Move from LO)//
 
-                case (0x12):;
+                case (0x12):
 
                 mflo(rdR);
 
@@ -465,7 +455,7 @@ void process_instruction()
 
                 //MTLO (Move to LO)//
 
-                case (0x13):;
+                case (0x13):
 
                 mtlo(rs);
 
@@ -474,7 +464,7 @@ void process_instruction()
 
                 //MULT//
 
-                case (0x18):;
+                case (0x18):
 
                 mult(rs, rt);
 
@@ -483,7 +473,7 @@ void process_instruction()
 
                 //MULTU//
 
-                case (0x19):;
+                case (0x19):
 
                 multu(rs, rt);
 
@@ -492,16 +482,21 @@ void process_instruction()
 
                 //ADD//
 
-                case (0x20):; //add //Causes an exception upon overflow (How do I do that?)
+                case (0x20): //add //Causes an exception upon overflow 
 
-                add(rs,rt,rdR);
+                addu(rs,rt,rdR);
+                if (NEXT_STATE.REGS[rdR] < CURRENT_STATE.REGS[rdR]) {
+                  printf("Overflow! ");
+                  RUN_BIT = 0;
+                }
+                
 
                 break;
 
 
                 //ADDU//
 
-                case (0x21):; //addu //Does NOT cause an exception upon overflow (How do I do that?)
+                case (0x21): //addu //Does NOT cause an exception upon overflow 
 
                 addu(rs,rt,rdR);
 
@@ -510,7 +505,7 @@ void process_instruction()
 
                 //SUB//
 
-                case (0x22):;
+                case (0x22):
 
                 sub(rs,rt,rdR);
 
@@ -519,7 +514,7 @@ void process_instruction()
 
                 //SUBU//
 
-                case (0x23):;
+                case (0x23):
 
                 subu(rs,rt,rdR);
 
@@ -528,7 +523,7 @@ void process_instruction()
 
                 //AND//
 
-                case (0x24):;
+                case (0x24):
 
                 and(rs,rt,rdR);
 
@@ -537,7 +532,7 @@ void process_instruction()
 
                 //OR//
 
-                case (0x25):;
+                case (0x25):
 
                 or(rs,rt,rdR);
 
@@ -546,7 +541,7 @@ void process_instruction()
 
                 //XOR//
 
-                case (0x26):;
+                case (0x26):
 
                 xor(rs,rt,rdR);
 
@@ -555,7 +550,7 @@ void process_instruction()
 
                 //NOR//
 
-                case (0x27):;
+                case (0x27):
 
                 nor(rs,rt,rdR);
 
@@ -564,7 +559,7 @@ void process_instruction()
 
                 //DIV// Should I worry if the divisor is 0? If so, how do I return undefined?
 
-                case (0x1a):;
+                case (0x1a):
 
                 div(rs,rt);
 
@@ -573,7 +568,7 @@ void process_instruction()
 
                 //DIVU//
 
-                case (0x1b):;
+                case (0x1b):
 
                 divu(rs,rt);
 
@@ -582,7 +577,7 @@ void process_instruction()
 
                 //SLT (Set Less Than)//
 
-                case (0x2a):;
+                case (0x2a):
 
                 slt(rs,rt,rdR);
 
@@ -591,7 +586,7 @@ void process_instruction()
 
                 //SLTU (Set Less Than Unsigned)//
 
-                case (0x2b):;
+                case (0x2b):
 
                 sltu(rs,rt,rdR);
 
@@ -600,9 +595,10 @@ void process_instruction()
 
                 //SYSCALL (Syscall)//
 
-                case (0xc):;
+                case (0xc):
 
                 if (CURRENT_STATE.REGS[2]==10) RUN_BIT=0;
+
 
                 break;
 
@@ -618,7 +614,7 @@ void process_instruction()
 
         //J//
 
-        case (0x2):;
+        case (0x2):
 
           jump(instruction);
 
@@ -627,7 +623,7 @@ void process_instruction()
 
         //JAL (Jump and Link)//
 
-        case (0x3):;
+        case (0x3):
 
           NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
           jump(instruction);
@@ -642,19 +638,17 @@ void process_instruction()
 
         //IMEDIATOS//
 
-        uint32_t immediate = instruction && 0x00000000000000001111111111111111;
-
         //BEQ (Branch Equal To)//
 
-        case (0x4):;
-          if (rs == rt) NEXT_STATE.PC += immediate;
+        case (0x4):
+          if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += immediate;
         break;
 
 
         //BNE (Branch NOT Equal To)//
 
-        case (0x5):;
-         if (rs != rt) NEXT_STATE.PC += immediate;
+        case (0x5):
+         if (CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += immediate;
         break;
 
 
@@ -667,14 +661,14 @@ void process_instruction()
                 //BLTZ (Branch on Less Than Zero)//
 
                 case (0x0):
-                   if (rs <= 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += immediate;
                 break;
 
 
                 //BGEZ (Branch on Greater Than or Equal to Zero)//
 
                 case (0x1):
-                   if (rs >= 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += immediate;
                 break;
 
 
@@ -682,15 +676,15 @@ void process_instruction()
 
                 case (0x10):
                    NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
-                   if (rs <= 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += immediate;
                 break; 
 
 
                 //Branch On Greater Than Or Equal To Zero And Link///
 
-                case (0x11):;
+                case (0x11):
                    NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
-                   if (rs >= 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += immediate;
                 break; 
 
             
@@ -704,66 +698,70 @@ void process_instruction()
 
         //BLEZ (Branch on Less Than or Equal to Zero)//
 
-        case (0x6):;
-
+        case (0x6):
+            if (CURRENT_STATE.REGS[rs] <= 0) NEXT_STATE.PC += immediate;
         break;
 
 
         //BGTZ (Branch on Greater Than Zero)//
 
-        case (0x7):;
-
+        case (0x7):
+            if (CURRENT_STATE.REGS[rs] > 0) NEXT_STATE.PC += immediate;
         break;
 
 
         //ADDI//
 
-        case (0x8):;
-
+        case (0x8):
+            addiu(instruction, rs, rt, immediate);
+            if (NEXT_STATE.REGS[rt] < CURRENT_STATE.REGS[rt]) {
+                printf("Overflow! ");
+                RUN_BIT = 0;
+            }
         break;
 
 
-        //ADDIU//        
+        //ADDIU (Add Immediate)//        
 
-        case (0x9):;
-        
-            addiu(instruction);
-
+        case (0x9):
+            addiu(instruction, rs, rt, immediate);
         break;
 
 
         //SLTI (Set Less Than Immediate)//
 
-        case (0xa):;
-
+        case (0xa):
+            if (CURRENT_STATE.REGS[(int32_t)rs] < (int32_t)immediate) CURRENT_STATE.REGS[rt] = 1; 
+            else CURRENT_STATE.REGS[rt] = 0;  
         break;
 
 
         //SLTIU (Set Less Than Immediate Unsigned)//
 
-        case (0xb):;
-
+        case (0xb):
+            if (CURRENT_STATE.REGS[rs] < immediate) CURRENT_STATE.REGS[rt] = 1; 
+            else CURRENT_STATE.REGS[rt] = 0; 
         break;
 
 
-        //ANDI//
+        //ANDI (And Immediate)//
 
-        case (0xc):;
-
+        case (0xc):
+            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] & immediate;  
         break;
 
 
         //ORI//
 
-        case (0xd):;
-
+        case (0xd):
+            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] | immediate;  
         break;
 
 
         //XORI//
 
-        case (0xe):;
-
+        case (0xe):
+            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] ^ immediate; 
         break;
 
 
