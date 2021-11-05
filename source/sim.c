@@ -773,22 +773,22 @@ void process_instruction()
 
         //LUI (Load Upper Immediate)//
 
-        case (0xf):;
-
+        case (0xf):
+           CURRENT_STATE.REGS[rt] = (immediate << 16);
         break;
 
 
         //LB (Load Byte)//
 
         case (0x20):;
-
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF);
         break;
 
 
         //LH (Load Halfword)//
 
         case (0x21):;
-
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF);
         break;
 
 
