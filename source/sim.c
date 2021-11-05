@@ -795,21 +795,21 @@ void process_instruction()
         //LW (Load Word)//
 
         case (0x23):;
-
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate);
         break;
 
 
         //LBU (Load Byte Unsigned)//
 
         case (0x24):;
-
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF);
         break;
 
 
         //LHU (Load Halfword Unsigned)//
 
         case (0x25):;
-
+            NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF);
         break;
 
 
