@@ -802,7 +802,7 @@ void process_instruction()
         //LBU (Load Byte Unsigned)//
 
         case (0x24):;
-           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF);
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF); 
         break;
 
 
