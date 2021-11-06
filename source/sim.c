@@ -731,37 +731,37 @@ void process_instruction()
         //SLTI (Set Less Than Immediate)//
 
         case (0xa):
-            if (CURRENT_STATE.REGS[(int32_t)rs] < (int32_t)immediate) CURRENT_STATE.REGS[rt] = 1; 
-            else CURRENT_STATE.REGS[rt] = 0;  
+            if (CURRENT_STATE.REGS[(int32_t)rs] < (int32_t)immediate) NEXT_STATE.REGS[rt] = 1; 
+            else NEXT_STATE.REGS[rt] = 0;  
         break;
 
 
         //SLTIU (Set Less Than Immediate Unsigned)//
 
         case (0xb):
-            if (CURRENT_STATE.REGS[rs] < immediate) CURRENT_STATE.REGS[rt] = 1; 
-            else CURRENT_STATE.REGS[rt] = 0; 
+            if (CURRENT_STATE.REGS[rs] < immediate) NEXT_STATE.REGS[rt] = 1; 
+            else NEXT_STATE.REGS[rt] = 0; 
         break;
 
 
         //ANDI (And Immediate)//
 
         case (0xc):
-            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] & immediate;  
+            NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] & immediate;  
         break;
 
 
         //ORI//
 
         case (0xd):
-            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] | immediate;  
+            NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] | immediate;  
         break;
 
 
         //XORI//
 
         case (0xe):
-            CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] ^ immediate; 
+            NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] ^ immediate; 
         break;
 
 
@@ -774,7 +774,7 @@ void process_instruction()
         //LUI (Load Upper Immediate)//
 
         case (0xf):
-           CURRENT_STATE.REGS[rt] = (immediate << 16);
+           NEXT_STATE.REGS[rt] = (immediate << 16);
         break;
 
 
@@ -819,21 +819,21 @@ void process_instruction()
 
         //SB (Store Byte)//
 
-        case (0x28):;
+        case (0x28):
            mem_write_32(CURRENT_STATE.REGS[rs] + immediate, (mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & 0xFFFFFF00) | (CURRENT_STATE.REGS[rt] & 0x000000FF));
         break;
 
 
         //SH (Store Halfword)//
 
-        case (0x29):;
+        case (0x29):
            mem_write_32(CURRENT_STATE.REGS[rs] + immediate, (mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & 0xFFFF0000) | (CURRENT_STATE.REGS[rt] & 0x0000FFFF));
         break;
 
         
         //SW (Store Word)//
 
-        case (0x2b):;
+        case (0x2b):
            mem_write_32(CURRENT_STATE.REGS[rs] + immediate, CURRENT_STATE.REGS[rt]);
         break;
 
