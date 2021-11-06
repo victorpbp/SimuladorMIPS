@@ -780,35 +780,35 @@ void process_instruction()
 
         //LB (Load Byte)//
 
-        case (0x20):;
-           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF);
+        case (0x20):
+           NEXT_STATE.REGS[rt] = (((int32_t) mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF)) << 24) >> 24;
         break;
 
 
         //LH (Load Halfword)//
 
-        case (0x21):;
-           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF);
+        case (0x21):
+           NEXT_STATE.REGS[rt] = (((int32_t) mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF)) << 16) >> 16;
         break;
 
 
         //LW (Load Word)//
 
-        case (0x23):;
+        case (0x23):
            NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate);
         break;
 
 
         //LBU (Load Byte Unsigned)//
 
-        case (0x24):;
+        case (0x24):
            NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF); 
         break;
 
 
         //LHU (Load Halfword Unsigned)//
 
-        case (0x25):;
+        case (0x25):
             NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF);
         break;
 
@@ -817,25 +817,24 @@ void process_instruction()
 
         //STORE//
 
-
         //SB (Store Byte)//
 
         case (0x28):;
-
+           mem_write_32(CURRENT_STATE.REGS[rs] + immediate, (mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & 0xFFFFFF00) | (CURRENT_STATE.REGS[rt] & 0x000000FF));
         break;
 
 
         //SH (Store Halfword)//
 
         case (0x29):;
-
+           mem_write_32(CURRENT_STATE.REGS[rs] + immediate, (mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & 0xFFFF0000) | (CURRENT_STATE.REGS[rt] & 0x0000FFFF));
         break;
 
         
         //SW (Store Word)//
 
         case (0x2b):;
-
+           mem_write_32(CURRENT_STATE.REGS[rs] + immediate, CURRENT_STATE.REGS[rt]);
         break;
 
 
