@@ -83,7 +83,7 @@ void jr(uint32_t rs) {
 
 void jalr(uint32_t rs, uint32_t rd) {
 
-    NEXT_STATE.REGS[rd] = NEXT_STATE.PC;
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
 
     NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
 
@@ -298,9 +298,6 @@ void addiu(uint32_t instruction, uint32_t rs, uint32_t rt, uint32_t immediate) {
 
     NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + immediate;
 
-    printf("valor do registrador: %d\n",NEXT_STATE.REGS[2]); //Caso de teste pra saber o valor do V0
-    printf("valor do registrador: %d\n",NEXT_STATE.REGS[8]); //Caso de teste pra saber o valor do t0
-    printf("valor do registrador: %d\n",NEXT_STATE.REGS[9]); //Caso de testa pra saber o valor do t1
 
 }
 
@@ -318,7 +315,6 @@ void addiu(uint32_t instruction, uint32_t rs, uint32_t rt, uint32_t immediate) {
 
 void process_instruction()
 {
-    printf("Aqui na funcao process_instruction\n");
     /* execute one instruction here. You should use CURRENT_STATE and modify
      * values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
      * access memory. */
@@ -326,6 +322,7 @@ void process_instruction()
      uint32_t instruction = mem_read_32(CURRENT_STATE.PC);
 
      uint32_t opcode = instruction>>26;
+     printf("opcode: %d\n", opcode);
 
      NEXT_STATE.PC = CURRENT_STATE.PC + 4; // To colocando isso aqui pra gente omitir nos outros campos
      //Aí quando a gente tiver tratando de Jumps e tal, é só levar isso em consideração
@@ -345,12 +342,15 @@ void process_instruction()
         //REGISTRADORES//
 
         case (0):; 
+ 
        
-            uint32_t functcode = instruction & 0b00000000000000000000000000011111; //Grabbing the funct code at the end of the instruction
+            uint32_t functcode = instruction & 0b00000000000000000000000000111111; //Grabbing the funct code at the end of the instruction
 
             uint32_t rdR = (instruction<<16)>>27; //Valor do registrador destino da operação
 
             uint32_t saR = (instruction<<21)>>27; //Shifts
+
+            printf("functcode: %d\n", functcode);
 
             switch (functcode) { 
 
@@ -498,6 +498,7 @@ void process_instruction()
 
                 case (0x21): //addu //Does NOT cause an exception upon overflow 
 
+                printf("addu");
                 addu(rs,rt,rdR);
 
                 break;
@@ -625,7 +626,7 @@ void process_instruction()
 
         case (0x3):
 
-          NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
+          NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
           jump(instruction);
          
 
@@ -641,14 +642,14 @@ void process_instruction()
         //BEQ (Branch Equal To)//
 
         case (0x4):
-          if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += immediate;
+          if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
         break;
 
 
         //BNE (Branch NOT Equal To)//
 
         case (0x5):
-         if (CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += immediate;
+         if (CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
         break;
 
 
@@ -661,30 +662,30 @@ void process_instruction()
                 //BLTZ (Branch on Less Than Zero)//
 
                 case (0x0):
-                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
                 break;
 
 
                 //BGEZ (Branch on Greater Than or Equal to Zero)//
 
                 case (0x1):
-                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += immediate;
+                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
                 break;
 
 
                 //BLTZAL (Branch on Less Than Zero and Link)///
 
                 case (0x10):
-                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
-                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += immediate;
+                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
                 break; 
 
 
                 //Branch On Greater Than Or Equal To Zero And Link///
 
                 case (0x11):
-                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
-                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += immediate;
+                   NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
                 break; 
 
             
@@ -699,14 +700,14 @@ void process_instruction()
         //BLEZ (Branch on Less Than or Equal to Zero)//
 
         case (0x6):
-            if (CURRENT_STATE.REGS[rs] <= 0) NEXT_STATE.PC += immediate;
+            if (CURRENT_STATE.REGS[rs] <= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
         break;
 
 
         //BGTZ (Branch on Greater Than Zero)//
 
         case (0x7):
-            if (CURRENT_STATE.REGS[rs] > 0) NEXT_STATE.PC += immediate;
+            if (CURRENT_STATE.REGS[rs] > 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
         break;
 
 
@@ -838,6 +839,9 @@ void process_instruction()
         break;
 
 
+     }
+     for (int x = 0; x < 32; x++) {
+       printf("%d: %0x\n", x, NEXT_STATE.REGS[x]); //print register values
      }
 
 
