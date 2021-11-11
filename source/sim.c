@@ -26,13 +26,13 @@ void srl(uint32_t rt, uint32_t rd, uint32_t sa) {
 
 void sra(uint32_t rt, uint32_t rd, uint32_t sa) {
 
-    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>sa;
+    NEXT_STATE.REGS[rd] = ((int32_t) CURRENT_STATE.REGS[rt])>>sa;
 
-    int32_t mask = 0b10000000000000000000000000000000;
+    // int32_t mask = 0b10000000000000000000000000000000;
 
-    if (sa>0) mask>>(sa-1);
+    // if (sa>0) mask>>(sa-1);
     
-    NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
+    // NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
 
 }
 
@@ -59,13 +59,13 @@ void srlv(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 void srav(uint32_t rs, uint32_t rt, uint32_t rd) {
 
-    NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt])>>CURRENT_STATE.REGS[rs];
+    NEXT_STATE.REGS[rd] = ((int32_t) CURRENT_STATE.REGS[rt])>>CURRENT_STATE.REGS[rs];
 
-    int32_t mask = 0b10000000000000000000000000000000;
+    // int32_t mask = 0b10000000000000000000000000000000;
 
-    if (CURRENT_STATE.REGS[rs]>0) mask>>(CURRENT_STATE.REGS[rs]-1);
+    // if (CURRENT_STATE.REGS[rs]>0) mask>>(CURRENT_STATE.REGS[rs]-1);
     
-    NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
+    // NEXT_STATE.REGS[rd] = NEXT_STATE.REGS[rd] | mask;
 
 }
 
@@ -151,6 +151,20 @@ void multu(uint32_t rs , uint32_t rt) {
 
 }
 
+//ADD//
+
+void add(uint32_t rs, uint32_t rt, uint32_t rd) {
+
+    int result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+    if ((CURRENT_STATE.REGS[rs] >> 31 == CURRENT_STATE.REGS[rt] >> 31) && CURRENT_STATE.REGS[rt]  >> 31 != result >> 31) {
+        NEXT_STATE.REGS[rd] = result; 
+    } else {
+        printf("Overflow!\n");
+        RUN_BIT = 0;
+    }
+
+}
+
 
 //ADDU//
 
@@ -160,12 +174,17 @@ void addu(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 }
 
-
 //SUB//
 
 void sub(uint32_t rs, uint32_t rt, uint32_t rd) {
 
-    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] - CURRENT_STATE.REGS[rs];
+    int result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+    if ((CURRENT_STATE.REGS[rs] >> 31 == CURRENT_STATE.REGS[rt] >> 31) && CURRENT_STATE.REGS[rt]  >> 31 != result >> 31) {
+        NEXT_STATE.REGS[rd] = result; 
+    } else {
+        printf("Overflow!\n");
+        RUN_BIT = 0;
+    }
 
 }
 
@@ -174,10 +193,9 @@ void sub(uint32_t rs, uint32_t rt, uint32_t rd) {
 
 void subu(uint32_t rs, uint32_t rt, uint32_t rd) {
 
-    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] - CURRENT_STATE.REGS[rs];
+    NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
 
 }
-
 
 //AND//
 
@@ -296,7 +314,7 @@ void addiu(uint32_t instruction, uint32_t rs, uint32_t rt, uint32_t immediate) {
 
     // uint32_t immediate = (instruction & 0x0000FFFF); //Valor do imediato
 
-    NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + immediate;
+    NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16);
 
 
 }
@@ -350,7 +368,7 @@ void process_instruction()
 
             uint32_t saR = (instruction<<21)>>27; //Shifts
 
-            printf("functcode: %d\n", functcode);
+            printf("functcode: %d", functcode);
 
             switch (functcode) { 
 
@@ -484,12 +502,7 @@ void process_instruction()
 
                 case (0x20): //add //Causes an exception upon overflow 
 
-                addu(rs,rt,rdR);
-                if (NEXT_STATE.REGS[rdR] < CURRENT_STATE.REGS[rdR]) {
-                  printf("Overflow! ");
-                  RUN_BIT = 0;
-                }
-                
+                add(rs,rt,rdR);
 
                 break;
 
@@ -498,7 +511,6 @@ void process_instruction()
 
                 case (0x21): //addu //Does NOT cause an exception upon overflow 
 
-                printf("addu");
                 addu(rs,rt,rdR);
 
                 break;
@@ -642,14 +654,14 @@ void process_instruction()
         //BEQ (Branch Equal To)//
 
         case (0x4):
-          if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+          if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
         break;
 
 
         //BNE (Branch NOT Equal To)//
 
         case (0x5):
-         if (CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+         if (CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
         break;
 
 
@@ -662,14 +674,14 @@ void process_instruction()
                 //BLTZ (Branch on Less Than Zero)//
 
                 case (0x0):
-                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+                   if ((int32_t) CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
                 break;
 
 
                 //BGEZ (Branch on Greater Than or Equal to Zero)//
 
                 case (0x1):
-                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+                   if ((int32_t) CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
                 break;
 
 
@@ -677,15 +689,15 @@ void process_instruction()
 
                 case (0x10):
                    NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
-                   if (CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+                   if ((int32_t) CURRENT_STATE.REGS[rs] < 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
                 break; 
 
 
-                //Branch On Greater Than Or Equal To Zero And Link///
+                //BGEZAL (Branch On Greater Than Or Equal To Zero And Link)///
 
                 case (0x11):
                    NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
-                   if (CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+                   if ((int32_t) CURRENT_STATE.REGS[rs] >= 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
                 break; 
 
             
@@ -700,14 +712,14 @@ void process_instruction()
         //BLEZ (Branch on Less Than or Equal to Zero)//
 
         case (0x6):
-            if (CURRENT_STATE.REGS[rs] <= 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+            if ((int32_t) CURRENT_STATE.REGS[rs] <= 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
         break;
 
 
         //BGTZ (Branch on Greater Than Zero)//
 
         case (0x7):
-            if (CURRENT_STATE.REGS[rs] > 0) NEXT_STATE.PC += ((immediate << 16) >> 16) * 4;
+            if ((int32_t) CURRENT_STATE.REGS[rs] > 0) NEXT_STATE.PC += (((int32_t) immediate << 16) >> 16) * 4;
         break;
 
 
@@ -782,14 +794,14 @@ void process_instruction()
         //LB (Load Byte)//
 
         case (0x20):
-           NEXT_STATE.REGS[rt] = (((int32_t) mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF)) << 24) >> 24;
+           NEXT_STATE.REGS[rt] = ((int32_t)( mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF)) << 24) >> 24;
         break;
 
 
         //LH (Load Halfword)//
 
         case (0x21):
-           NEXT_STATE.REGS[rt] = (((int32_t) mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF)) << 16) >> 16;
+           NEXT_STATE.REGS[rt] = ((int32_t)(mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF)) << 16) >> 16;
         break;
 
 
@@ -840,9 +852,11 @@ void process_instruction()
 
 
      }
+     printf("\n"); //linebreak to keep things aligned, even if functcode is absent
      for (int x = 0; x < 32; x++) {
-       printf("%d: %0x\n", x, NEXT_STATE.REGS[x]); //print register values
+       printf("%02d: 0x%08x\n", x, NEXT_STATE.REGS[x]); //print register values
      }
+     printf("PC: 0x%08x\n", NEXT_STATE.PC); //print PC value
 
 
 }
