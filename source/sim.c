@@ -106,7 +106,7 @@ void mthi(uint32_t rs) {
     NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
 
 }
-
+ 
 
 //MFLO (Move from LO)//
 
@@ -156,11 +156,11 @@ void multu(uint32_t rs , uint32_t rt) {
 void add(uint32_t rs, uint32_t rt, uint32_t rd) {
 
     int result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
-    if ((CURRENT_STATE.REGS[rs] >> 31 == CURRENT_STATE.REGS[rt] >> 31) && CURRENT_STATE.REGS[rt]  >> 31 != result >> 31) {
-        NEXT_STATE.REGS[rd] = result; 
-    } else {
-        printf("Overflow!\n");
+    if (((CURRENT_STATE.REGS[rs] >> 31) == CURRENT_STATE.REGS[rt] >> 31) && ((CURRENT_STATE.REGS[rt]  >> 31) != (result >> 31))) {
+        printf("\nOverflow!\n");
         RUN_BIT = 0;
+    } else {
+        NEXT_STATE.REGS[rd] = result; 
     }
 
 }
@@ -179,11 +179,11 @@ void addu(uint32_t rs, uint32_t rt, uint32_t rd) {
 void sub(uint32_t rs, uint32_t rt, uint32_t rd) {
 
     int result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-    if ((CURRENT_STATE.REGS[rs] >> 31 == CURRENT_STATE.REGS[rt] >> 31) && CURRENT_STATE.REGS[rt]  >> 31 != result >> 31) {
-        NEXT_STATE.REGS[rd] = result; 
-    } else {
-        printf("Overflow!\n");
+    if (((CURRENT_STATE.REGS[rs] >> 31) == !(CURRENT_STATE.REGS[rt] >> 31)) && ((CURRENT_STATE.REGS[rt]  >> 31) != (result >> 31))) {
+        printf("\nOverflow!\n");
         RUN_BIT = 0;
+    } else {
+        NEXT_STATE.REGS[rd] = result; 
     }
 
 }
@@ -299,9 +299,9 @@ void jump(uint32_t instruction) {
 
 //OPERAÇÕES DO TIPO J (JUMPS)//
 
+/////////////////////////
 
-/////////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////
 //OPERAÇÕES DO TIPO I (IMEDIATOS)//
 
 //ADDIU//
@@ -794,35 +794,35 @@ void process_instruction()
         //LB (Load Byte)//
 
         case (0x20):
-           NEXT_STATE.REGS[rt] = ((int32_t)( mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF)) << 24) >> 24;
+           NEXT_STATE.REGS[rt] = ((int32_t)( mem_read_32(CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16)) & (0x000000FF)) << 24) >> 24;
         break;
 
 
         //LH (Load Halfword)//
 
         case (0x21):
-           NEXT_STATE.REGS[rt] = ((int32_t)(mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF)) << 16) >> 16;
+           NEXT_STATE.REGS[rt] = ((int32_t)(mem_read_32(CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16)) & (0x0000FFFF)) << 16) >> 16;
         break;
 
 
         //LW (Load Word)//
 
         case (0x23):
-           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate);
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16));
         break;
 
 
         //LBU (Load Byte Unsigned)//
 
         case (0x24):
-           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x000000FF); 
+           NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16)) & (0x000000FF); 
         break;
 
 
         //LHU (Load Halfword Unsigned)//
 
         case (0x25):
-            NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + immediate) & (0x0000FFFF);
+            NEXT_STATE.REGS[rt] = mem_read_32(CURRENT_STATE.REGS[rs] + (((int32_t) immediate << 16) >> 16)) & (0x0000FFFF);
         break;
 
 
@@ -856,7 +856,7 @@ void process_instruction()
      for (int x = 0; x < 32; x++) {
        printf("%02d: 0x%08x\n", x, NEXT_STATE.REGS[x]); //print register values
      }
-     printf("PC: 0x%08x\n", NEXT_STATE.PC); //print PC value
+     printf("PC: 0x%08x\n\n", NEXT_STATE.PC); //print PC value
 
 
 }
